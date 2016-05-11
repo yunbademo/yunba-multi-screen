@@ -276,8 +276,8 @@ function init_yunba() {
 
 function process_data(data) {
     // console.log(data);
-    var d = new Date();
-    console.log(d.getTime());
+    // var d = new Date();
+    // console.log(d.getTime());
     var draw = JSON.parse(data.msg);
     if (draw.cid == cid) {
         return;
@@ -299,8 +299,8 @@ function process_data(data) {
 }
 
 function publish_draw() {
-    var d = new Date();
-    console.log(d.getTime());
+    // var d = new Date();
+    // console.log(d.getTime());
     var draw = {
             cid: cid,
             name: brush_name,
