@@ -1,0 +1,309 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Particles</title>
+  <link rel="stylesheet" href="http://cdn.bootcss.com/bootstrap/3.3.6/css/bootstrap.min.css">
+  <link rel="stylesheet" href="css/messenger.css">
+  <link rel="stylesheet" href="css/messenger-theme-flat.css">
+  <style type="text/css">
+    #cv {
+      background: #DDDDDD;
+      border-radius: 3px;
+      height: 640px;
+    }
+    .center {
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-md-3 col-xs-0"></div>
+      <div class="col-md-6 col-xs-12">
+        <p class="center">
+          这是使用云巴
+          <a href="https://github.com/yunba/yunba-javascript-sdk">Javascript SDK</a>
+          实现的多屏触摸示例，可以打开多个此页面（扫描以下二维码可在手机上打开），在任一页面上的触摸或鼠标划过动作都会实时的反映在所有页面上。
+        </p>
+      </div>
+      <div class="col-md-3 col-xs-0"></div>
+    </div>
+    <div class="row">
+      <div class="col-md-2 col-xs-0"></div>
+      <div class="col-md-8 col-xs-12">
+        <p class="center">
+          <img src="img/qr.png">
+        </p>
+      </div>
+      <div class="col-md-2 col-xs-0"></div>
+    </div>
+    <div class="row">
+      <div class="col-md-2 col-xs-0"></div>
+      <div class="col-md-8 col-xs-12">
+        <div id="cv"></div>
+      </div>
+      <div class="col-md-2 col-xs-0"></div>
+    </div>
+  </div>
+
+  <script src="https://cdn.bootcss.com/socket.io/1.4.5/socket.io.js"></script>
+  <script src="https://rawgit.com/yunba/yunba-javascript-sdk/master/yunba-js-sdk.js"></script>
+  <script src="http://cdn.bootcss.com/jquery/2.2.1/jquery.min.js"></script>
+  <script type="text/javascript" src="js/messenger.min.js"></script>
+  <script type="text/javascript" src="js/messenger-theme-flat.js"></script>
+
+  <script src="js/sketch.js"></script>
+  <script>
+
+function Particle(x, y, radius) {
+  this.init(x, y, radius);
+}
+
+Particle.prototype = {
+
+  init: function(x, y, radius) {
+
+    this.alive = true;
+
+    this.radius = radius || 10;
+    this.wander = 0.15;
+    this.theta = random(TWO_PI);
+    this.drag = 0.92;
+    this.color = '#fff';
+
+    this.x = x || 0.0;
+    this.y = y || 0.0;
+
+    this.vx = 0.0;
+    this.vy = 0.0;
+  },
+
+  move: function() {
+
+    this.x += this.vx;
+    this.y += this.vy;
+
+    this.vx *= this.drag;
+    this.vy *= this.drag;
+
+    this.theta += random(-0.5, 0.5) * this.wander;
+    this.vx += sin(this.theta) * 0.1;
+    this.vy += cos(this.theta) * 0.1;
+
+    this.radius *= 0.96;
+    this.alive = this.radius > 0.5;
+  },
+
+  draw: function(ctx) {
+
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, this.radius, 0, TWO_PI);
+    ctx.fillStyle = this.color;
+    ctx.fill();
+  }
+};
+
+// ----------------------------------------
+// Example
+// ----------------------------------------
+var topic = 'particles';
+var yunba;
+
+var MAX_PARTICLES = 96;
+var COLOURS = ['#69D2E7', '#A7DBD8', '#E0E4CC', '#F38630', '#FA6900', '#FF4E50', '#F9D423'];
+
+var particles = [];
+
+var pool = [];
+var demo;
+
+function setup() {
+
+  // Set off some initial particles.
+  var i, x, y;
+
+  for (i = 0; i < 20; i++) {
+    x = (demo.width * 0.5) + random(-100, 100);
+    y = (demo.height * 0.5) + random(-100, 100);
+    demo.spawn(x, y);
+  }
+};
+
+function spawn(x, y) {
+
+  if (particles.length >= MAX_PARTICLES)
+    pool.push(particles.shift());
+
+  particle = pool.length ? pool.pop() : new Particle();
+  particle.init(x, y, random(5, 40));
+
+  particle.wander = random(0.5, 2.0);
+  particle.color = random(COLOURS);
+  particle.drag = random(0.9, 0.99);
+
+  theta = random(TWO_PI);
+  force = random(2, 8);
+
+  particle.vx = sin(theta) * force;
+  particle.vy = cos(theta) * force;
+
+  particles.push(particle);
+};
+
+function update() {
+
+  var i, particle;
+
+  for (i = particles.length - 1; i >= 0; i--) {
+
+    particle = particles[i];
+
+    if (particle.alive) particle.move();
+    else pool.push(particles.splice(i, 1)[0]);
+  }
+};
+
+function draw() {
+
+  demo.globalCompositeOperation = 'lighter';
+
+  for (var i = particles.length - 1; i >= 0; i--) {
+    particles[i].draw(demo);
+  }
+};
+
+function mousemove() {
+  var particle, theta, force, touch, max, i, j, n;
+  var xys = []
+
+  for (i = 0, n = demo.touches.length; i < n; i++) {
+    xys.push({
+      x: demo.touches[i].x,
+      y: demo.touches[i].y
+    })
+  }
+
+  //console.log(JSON.stringify(xys));
+  yunba.publish({
+      topic: topic,
+      msg: JSON.stringify(xys)
+    },
+    function(success, msg) {
+      if (!success) {
+        console.log(msg);
+      }
+    }
+  );
+  return;
+  for (i = 0, n = demo.touches.length; i < n; i++) {
+
+    touch = demo.touches[i], max = random(1, 4);
+    for (j = 0; j < max; j++) {
+      demo.spawn(touch.x, touch.y);
+    }
+  }
+};
+
+function create_demo() {
+  demo = Sketch.create({
+    container: document.getElementById('cv'),
+    fullscreen: false,
+    autopause: false,
+    width: $('#cv').width(),
+    height: $('#cv').height(),
+  });
+  demo.setup = setup;
+  demo.spawn = spawn;
+  demo.update = update;
+  demo.draw = draw;
+  demo.mousemove = mousemove;
+}
+
+$(window).resize(function() {
+  if (demo) {
+    demo.destroy();
+  }
+  create_demo();
+});
+
+function process_data(data) {
+  // console.log(data.msg);
+  var xys = JSON.parse(data.msg);
+  for (var i = 0; i < xys.length; i++) {
+    max = random(1, 4);
+    for (var j = 0; j < max; j++) {
+      demo.spawn(xys[i].x, xys[i].y);
+    }
+  }
+}
+
+function init_yunba() {
+    Messenger.options = {
+        extraClasses: 'messenger-fixed messenger-on-top',
+        theme: 'flat',
+    };
+
+    yunba = new Yunba({
+        server: 'sock.yunba.io',
+        port: 3000,
+        appkey: '56a0a88c4407a3cd028ac2fe'
+    });
+
+    yunba.init(function(success) {
+        if (success) {
+            cid = Math.random().toString().substr(2);
+            console.log('cid: ' + cid);
+            yunba.connect_by_customid(cid,
+                function(success, msg, sessionid) {
+                    if (success) {
+                        console.log('sessionid：' + sessionid);
+                        yunba.subscribe({
+                                'topic': topic
+                            },
+                            function(success, msg) {
+                                if (success) {
+                                    console.log('subscribed');
+                                    msg_notify('success', '连接服务器成功~');
+                                    yunba.set_message_cb(function(data) {
+                                        process_data(data);
+                                    });
+                                } else {
+                                    console.log(msg);
+                                    msg_notify('error', msg);
+                                }
+                            }
+                        );
+                    } else {
+                        console.log(msg);
+                        msg_notify('error', msg);
+                    }
+                });
+        } else {
+            console.log('yunba init failed');
+            msg_notify('error', '连接出错，请尝试刷新~');
+        }
+    });
+}
+
+function msg_notify(type, msg) {
+    Messenger().post({
+        message: msg,
+        type: type,
+        hideAfter: 2,
+        // showCloseButton: true
+    });
+}
+
+$(document).ready(function() {
+  create_demo();
+  init_yunba();
+});
+
+</script>
+</body>
+</html>
+

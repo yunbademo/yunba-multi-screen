@@ -1,0 +1,109 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>Drawing</title>
+  <link rel="stylesheet" href="http://cdn.bootcss.com/bootstrap/3.3.6/css/bootstrap.min.css">
+  <link rel="stylesheet" href="css/messenger.css">
+  <link rel="stylesheet" href="css/messenger-theme-flat.css">
+
+  <style type="text/css">
+    #dcv {
+      border: 1px solid #aaa;
+      border-radius: 3px;
+      height: 512px;
+      width: 100%;
+    }
+    #brush-color {
+      border-radius: 2px;
+      border: 1px solid #aaa;
+      visibility: hidden;
+    }
+    .center {
+      text-align: center;
+    }
+    .nopaddingleft {
+      padding-left: 0px;
+    }
+    .nopaddingright {
+      padding-right: 0px;
+    }
+  </style>
+    <script src="https://cdn.bootcss.com/socket.io/1.4.5/socket.io.js"></script>
+    <script src="https://rawgit.com/yunba/yunba-javascript-sdk/master/yunba-js-sdk.js"></script>
+    <script src="http://cdn.bootcss.com/jquery/2.2.1/jquery.min.js"></script>
+
+    <script type="text/javascript" src="js/messenger.min.js"></script>
+    <script type="text/javascript" src="js/messenger-theme-flat.js"></script>
+
+    <script type="text/javascript" src="js/brushes/circles.js"></script>
+    <script type="text/javascript" src="js/brushes/chrome.js"></script>
+    <script type="text/javascript" src="js/brushes/fur.js"></script>
+    <script type="text/javascript" src="js/brushes/longfur.js"></script>
+    <script type="text/javascript" src="js/brushes/shaded.js"></script>
+    <script type="text/javascript" src="js/brushes/simple.js"></script>
+    <script type="text/javascript" src="js/brushes/sketchy.js"></script>
+    <script type="text/javascript" src="js/brushes/squares.js"></script>
+    <script type="text/javascript" src="js/brushes/web.js"></script>
+    <script type="text/javascript" src="js/colorutils.js"></script>
+    <script type="text/javascript" src="js/colorselector.js"></script>
+    <script type="text/javascript" src="js/palette.js"></script>
+    <script type="text/javascript" src="js/menu.js"></script>
+</head>
+<body>
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-md-3 col-xs-0"></div>
+      <div class="col-md-6 col-xs-12">
+        <p class="center">
+          这是使用云巴
+          <a href="https://github.com/yunba/yunba-javascript-sdk">Javascript SDK</a>
+          实现的多人绘图示例，在任一页面上绘制都会实时显示在所有页面上（扫描以下二维码可在手机上打开），邀请你的朋友一起来创作吧～
+        </p>
+      </div>
+      <div class="col-md-3 col-xs-0"></div>
+    </div>
+    <div class="row">
+      <div class="col-md-2 col-xs-0"></div>
+      <div class="col-md-8 col-xs-12">
+        <p class="center">
+          <img src="img/qr.png">
+        </p>
+      </div>
+      <div class="col-md-2 col-xs-0"></div>
+    </div>
+    <div class="row">
+      <div class="col-md-2 col-xs-0"></div>
+      <div class="col-md-1 col-xs-3 nopaddingright">
+        画笔颜色：
+      </div>
+      <div class="col-md-1 col-xs-3 nopaddingleft">
+        <canvas id="brush-color"></canvas>
+      </div>
+      <div class="col-md-1 col-xs-3 nopaddingright">
+        画笔形状：
+      </div>
+      <div class="col-md-1 col-xs-3 nopaddingleft">
+        <select id="brush-type"></select>
+      </div>
+      <div class="col-md-6 col-xs-0"></div>
+    </div>
+    <div class="row">
+      <div class="col-md-2 col-xs-0"></div>
+      <div class="col-md-8 col-xs-12">
+        <div id="dcv">
+          <canvas id="cv"></canvas>
+        </div>
+      </div>
+      <div class="col-md-2 col-xs-0"></div>
+    </div>
+  </div>
+  <div id="palette"></div>
+
+  <script type="text/javascript" src="js/menu.js"></script>
+  <script type="text/javascript" src="js/main.js"></script>
+</body>
+</html>
